@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Multi-provider notification plugin for Claude Code",
   "author": {
-    "name": "vibe-with-me-tools",
-    "url": "https://github.com/vibe-with-me-tools"
+    "name": "sidhusmart",
+    "url": "https://github.com/sidhusmart"
   },
-  "repository": "https://github.com/vibe-with-me-tools/agent-reachout",
+  "repository": "https://github.com/sidhusmart/agent-reachout",
   "license": "MIT",
   "keywords": ["notifications", "telegram", "messaging", "alerts", "claude-code-plugin", "llm-notifications"],
   "mcpServers": {
@@ -15,7 +15,8 @@
       "args": ["run", "${CLAUDE_PLUGIN_ROOT}/server/src/index.ts"],
       "env": {
         "AGENT_REACHOUT_TELEGRAM_BOT_TOKEN": "${TELEGRAM_BOT_TOKEN}",
-        "AGENT_REACHOUT_TELEGRAM_CHAT_ID": "${TELEGRAM_CHAT_ID}"
+        "AGENT_REACHOUT_TELEGRAM_CHAT_ID": "${TELEGRAM_CHAT_ID}",
+        "AGENT_REACHOUT_TELEGRAM_TOPIC_ID": "${TELEGRAM_TOPIC_ID}"
       }
     }
   },
@@ -25,7 +26,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "SILENTLY evaluate if you should notify the user. ONLY use notify_user if you completed significant work or encountered a blocker. Do NOT output any text - either notify or do nothing."
+            "prompt": "FIRST check if the user mentioned 'telegram mode', 'notify me on telegram', 'notify me', or 'I'm stepping away' near the START of this conversation. If they did NOT mention any of these phrases, do absolutely nothing. If they DID, SILENTLY evaluate if you should notify the user - ONLY use notify_user if you completed significant work or encountered a blocker. Do NOT output any text - either notify or do nothing."
           }
         ]
       }
@@ -36,7 +37,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "STOP. Do NOT use AskUserQuestion. Instead, use the send_message tool with provider='telegram' and wait_for_response=true to ask the user via Telegram. This allows the user to respond from their phone."
+            "prompt": "FIRST check if the user mentioned 'telegram mode', 'notify me on telegram', 'notify me', or 'I'm stepping away' near the START of this conversation. If they did NOT mention any of these phrases, proceed with AskUserQuestion normally as if this hook did not exist. If they DID, do NOT use AskUserQuestion - instead use the send_message tool with provider='telegram' and wait_for_response=true to ask the user via Telegram."
           }
         ]
       }

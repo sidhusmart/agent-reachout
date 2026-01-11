@@ -21,10 +21,12 @@ const providers = new Map<ProviderType, Provider>();
 function initializeProviders(): void {
   const telegramToken = process.env.AGENT_REACHOUT_TELEGRAM_BOT_TOKEN;
   const telegramChatId = process.env.AGENT_REACHOUT_TELEGRAM_CHAT_ID;
+  const telegramTopicId = process.env.AGENT_REACHOUT_TELEGRAM_TOPIC_ID;
 
   if (telegramToken && telegramChatId) {
-    providers.set('telegram', new TelegramProvider(telegramToken, telegramChatId));
-    console.error('Telegram provider initialized');
+    providers.set('telegram', new TelegramProvider(telegramToken, telegramChatId, telegramTopicId));
+    const topicInfo = telegramTopicId ? ` (topic: ${telegramTopicId})` : '';
+    console.error(`Telegram provider initialized${topicInfo}`);
   } else {
     console.error('Telegram provider not configured: missing AGENT_REACHOUT_TELEGRAM_BOT_TOKEN or AGENT_REACHOUT_TELEGRAM_CHAT_ID');
   }

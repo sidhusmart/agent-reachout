@@ -6,20 +6,27 @@ export class TelegramProvider implements Provider {
   readonly name: ProviderType = 'telegram';
   private bot: TelegramBot;
   private chatId: string;
+  private topicId?: string;
   private pendingResponse: {
     resolve: (msg: string) => void;
     reject: (err: Error) => void;
     timeoutId: ReturnType<typeof setTimeout>;
   } | null = null;
 
-  constructor(token: string, chatId: string) {
+  constructor(token: string, chatId: string, topicId?: string) {
     this.chatId = chatId;
+    this.topicId = topicId;
     this.bot = new TelegramBot(token, { polling: true });
 
     // Handle incoming messages
     this.bot.on('message', (msg) => {
       // Only process messages from our configured chat
       if (msg.chat.id.toString() !== this.chatId) {
+        return;
+      }
+
+      // If topic ID is configured, only accept messages from that topic
+      if (this.topicId && msg.message_thread_id?.toString() !== this.topicId) {
         return;
       }
 
@@ -38,7 +45,10 @@ export class TelegramProvider implements Provider {
   }
 
   async send(text: string): Promise<SendResult> {
-    const message = await this.bot.sendMessage(this.chatId, text);
+    const options = this.topicId
+      ? { message_thread_id: parseInt(this.topicId, 10) }
+      : {};
+    const message = await this.bot.sendMessage(this.chatId, text, options);
     return {
       messageId: message.message_id.toString(),
       timestamp: message.date * 1000,
@@ -68,7 +78,10 @@ export class TelegramProvider implements Provider {
   }
 
   async sendNoWait(text: string): Promise<void> {
-    await this.bot.sendMessage(this.chatId, text);
+    const options = this.topicId
+      ? { message_thread_id: parseInt(this.topicId, 10) }
+      : {};
+    await this.bot.sendMessage(this.chatId, text, options);
   }
 
   dispose(): void {

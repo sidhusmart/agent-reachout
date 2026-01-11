@@ -11,6 +11,8 @@ Start a task, walk away from your computer, and get notified on your phone when 
 - **Mobile-first**: Get notifications and respond from your phone, smartwatch, or any Telegram client
 - **Multi-turn conversations**: Have natural back-and-forth dialogue with Claude via Telegram
 - **Smart hooks**: Automatically redirects CLI questions to Telegram and notifies you on task completion
+- **On-demand activation**: Only activates when you say "notify me on telegram" - stays silent otherwise
+- **Topic support**: Send messages to a specific topic in a Telegram group instead of direct messages
 - **Simple setup**: Just a Telegram bot - no paid services or complex infrastructure required
 
 ## Setup
@@ -34,16 +36,30 @@ Add these to your shell profile (`~/.zshrc`, `~/.bashrc`, etc.):
 ```bash
 export TELEGRAM_BOT_TOKEN="your_bot_token_here"
 export TELEGRAM_CHAT_ID="your_chat_id_here"
+export TELEGRAM_TOPIC_ID="your_topic_id_here"  # Optional: for group topics
 ```
 
 Then reload your shell or run `source ~/.zshrc`.
+
+### 4. (Optional) Set Up Group Topics
+
+If you prefer messages in a group topic instead of direct messages:
+
+1. Create a Telegram group and enable Topics (Group Settings > Topics)
+2. Add your bot to the group as an admin
+3. Create a topic for Claude notifications (e.g., "Claude Updates")
+4. Get the topic ID by right-clicking the topic and copying the link - the topic ID is the number after the last slash (e.g., `https://t.me/c/1234567890/42` → topic ID is `42`)
+5. Set `TELEGRAM_CHAT_ID` to the group ID (negative number, e.g., `-1001234567890`)
+6. Set `TELEGRAM_TOPIC_ID` to the topic ID
+
+The bot will only send to and receive messages from that specific topic.
 
 ## Installation
 
 Install via Claude Code:
 
 ```
-/plugin marketplace add vibe-with-me-tools/agent-reachout
+/plugin marketplace add sidhusmart/agent-reachout
 /plugin install agent-reachout@agent-reachout
 ```
 
@@ -107,6 +123,27 @@ The plugin includes two hooks that enhance Claude's behavior:
 | **Stop** | When Claude stops, evaluates if you should be notified about completed work or blockers |
 | **PreToolCall: AskUserQuestion** | Redirects questions to Telegram instead of the CLI, so you can respond from your phone |
 
+### On-Demand Activation
+
+Hooks only activate when you explicitly request Telegram notifications at the start of your session. Use phrases like:
+
+- "notify me on telegram"
+- "telegram mode"
+- "I'm stepping away"
+- "notify me"
+
+**Examples:**
+
+```
+You: "I'm stepping away - please refactor the auth module and notify me on telegram when done"
+→ Claude will send updates to Telegram
+
+You: "Refactor the auth module"
+→ Claude works normally, no Telegram notifications
+```
+
+This lets you use the plugin for both interactive coding sessions (no notifications) and background tasks (with notifications).
+
 ## Example Usage
 
 **Claude needs confirmation:**
@@ -138,7 +175,8 @@ Claude: Build completed.
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `TELEGRAM_BOT_TOKEN` | Yes | Bot token from @BotFather |
-| `TELEGRAM_CHAT_ID` | Yes | Your Telegram user ID |
+| `TELEGRAM_CHAT_ID` | Yes | Your Telegram user ID or group ID (negative number for groups) |
+| `TELEGRAM_TOPIC_ID` | No | Topic ID for group forum topics (messages only go to this topic) |
 
 ## Project Structure
 
